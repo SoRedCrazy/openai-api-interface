@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Multi-Flux OpenAI Interface</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        box-sizing: border-box;
+        margin: 0;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: auto;
+        padding: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        background-color: #ffffff;
+        box-sizing: border-box;
+      }
+
+      input,
+      textarea,
+      button {
+        width: calc(100% - 22px); /* Ajuster pour le padding et la bordure */
+        padding: 10px;
+        margin-top: 10px;
+        box-sizing: border-box;
+      }
+
+      input,
+      textarea {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+
+      textarea {
+        resize: vertical;
+      }
+
+      button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      .tabs {
+        display: flex;
+        margin-bottom: 10px;
+        border-bottom: 2px solid #ddd;
+      }
+
+      .tab {
+        padding: 10px;
+        cursor: pointer;
+        border: 1px solid #ddd;
+        border-bottom: none;
+        background-color: #f8f9fa;
+        border-radius: 4px 4px 0 0;
+      }
+
+      .tab.active {
+        background-color: #007bff;
+        color: white;
+        border: 1px solid #007bff;
+        border-bottom: none;
+      }
+
+      .chat-container {
+        display: none;
+        border: 1px solid #ddd;
+        padding: 10px;
+        background-color: #f8f9fa;
+        height: 600px;
+        overflow-y: auto;
+        margin-bottom: 10px;
+        border-radius: 4px;
+      }
+
+      .chat-container.active {
+        display: block;
+      }
+
+      .message {
+        margin-bottom: 10px;
+      }
+
+      .message.user {
+        font-weight: bold;
+        color: #007bff;
+      }
+
+      .message.bot {
+        margin-left: 20px;
+        font-style: italic;
+        color: #333;
+      }
+
+      .code-block {
+        background: #f4f4f4;
+        border: 1px solid #ddd;
+        padding: 10px;
+        margin-bottom: 10px;
+        position: relative;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+
+      .copy-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+        border-radius: 4px;
+      }
+
+      .copy-button:hover {
+        background: #0056b3;
+      }
+      .json-block code {
+        display: block;
+        padding: 0;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Multi-Flux OpenAI Interface</h1>
+
+      <div class="tabs" id="tabs">
+        <!-- Tabs will be dynamically added here -->
+      </div>
+
+      <div class="chat-containers" id="chat-containers">
+        <!-- Chat containers will be dynamically added here -->
+      </div>
+
+      <form id="openai-form">
+        <label for="apiKey">Your OpenAI API Key:</label>
+        <input
+          type="text"
+          id="apiKey"
+          name="apiKey"
+          placeholder="Enter your OpenAI API key"
+          required
+        />
+
+        <label for="model">Select GPT Model:</label>
+        <select id="model" name="model" required>
+          <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+          <option value="gpt-3.5-turbo-16k">GPT-3.5 Turbo 16k</option>
+          <option value="gpt-4">GPT-4</option>
+          <option value="gpt-4-0314">GPT-4 0314</option>
+          <option value="gpt-4-1106">GPT-4 1106</option>
+          <option value="gpt-4-turbo">GPT-4 Turbo</option>
+          <!-- Add more models as needed -->
+        </select>
+        <br /><br />
+        <label for="prompt">Enter your prompt:</label>
+        <textarea
+          id="prompt"
+          name="prompt"
+          rows="3"
+          placeholder="Ask anything..."
+          required
+        ></textarea>
+
+        <button type="submit">Submit</button>
+      </form>
+
+      <button id="newChatButton" style="margin-top: 10px">New Chat</button>
+
+      <button id="downloadChatButton" style="margin-top: 10px">
+        Download Chat
+      </button>
+
+      <div id="loading" class="loading" style="display: none">
+        <div class="loading-spinner"></div>
+      </div>
+    </div>
+
+    <script>
+      let currentTab = 0;
+      let chatIndex = 0;
+
+      document
+        .getElementById("openai-form")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
+
+          const apiKey = document.getElementById("apiKey").value;
+          const model = document.getElementById("model").value;
+          const prompt = document.getElementById("prompt").value;
+          const conversationDiv = document.getElementById(
+            `chat-container-${currentTab}`
+          );
+
+          if (!conversationDiv) {
+            console.error(`No chat container found for index ${currentTab}`);
+            return;
+          }
+
+          // Show user message
+          const userMessage = document.createElement("div");
+          userMessage.className = "message user";
+          userMessage.innerText = `You: ${prompt}`;
+          conversationDiv.appendChild(userMessage);
+
+          // Clear the prompt field
+          document.getElementById("prompt").value = "";
+
+          // Show loading spinner
+          document.getElementById("loading").style.display = "flex";
+
+          try {
+            const response = await fetch("/api/openai", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ apiKey, model, prompt }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+              const botMessage = document.createElement("div");
+              botMessage.className = "message bot";
+
+              // Extract and format code blocks
+              const formattedResponse = formatResponseText(
+                data.choices[0].message.content
+              );
+              botMessage.innerHTML = formattedResponse;
+
+              conversationDiv.appendChild(botMessage);
+            } else {
+              const errorMessage = document.createElement("div");
+              errorMessage.className = "message bot";
+              errorMessage.innerText = `Error: ${data.error}`;
+              conversationDiv.appendChild(errorMessage);
+            }
+          } catch (error) {
+            const errorMessage = document.createElement("div");
+            errorMessage.className = "message bot";
+            errorMessage.innerText = `Request failed: ${error.message}`;
+            conversationDiv.appendChild(errorMessage);
+          } finally {
+            // Hide loading spinner
+            document.getElementById("loading").style.display = "none";
+          }
+
+          // Scroll to the bottom of the chat
+          conversationDiv.scrollTop = conversationDiv.scrollHeight;
+        });
+
+      function formatResponseText(text) {
+        // First format JSON blocks
+        let formattedText = formatJsonBlocks(text);
+        // Then format other code blocks
+        formattedText = formatCodeBlocks(formattedText);
+        return formattedText;
+      }
+
+      function formatCodeBlocks(text) {
+        return text.replace(/```([\s\S]*?)```/g, (match, code) => {
+          return `
+            <div class="code-block">
+                <pre><code>${escapeHtml(code)}</code></pre>
+                <button class="copy-button" onclick="copyToClipboard(\`${escapeHtml(
+                  code
+                ).replace(/`/g, "\\`")}\`)">Copy</button>
+            </div>
+        `;
+        });
+      }
+      function formatJsonBlocks(text) {
+        // Find JSON blocks in the text
+        const jsonPattern = /(?:^|\n)({[\s\S]*?})(?:$|\n)/g;
+        return text.replace(jsonPattern, (match, json) => {
+          let formattedJson;
+          try {
+            // Parse and prettify JSON
+            const parsedJson = JSON.parse(json);
+            formattedJson = JSON.stringify(parsedJson, null, 2); // Pretty print with 2 spaces
+          } catch (e) {
+            formattedJson = json; // If JSON parsing fails, return as is
+          }
+
+          return `
+            <div class="json-block">
+                <pre><code>${escapeHtml(formattedJson)}</code></pre>
+                <button class="copy-button" onclick="copyToClipboard(\`${escapeHtml(
+                  formattedJson
+                ).replace(/`/g, "\\`")}\`)">Copy</button>
+            </div>
+        `;
+        });
+      }
+      function escapeHtml(text) {
+        return text.replace(/[&<>"']/g, (match) => {
+          const map = {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;",
+          };
+          return map[match];
+        });
+      }
+
+      function copyToClipboard(text) {
+        navigator.clipboard
+          .writeText(text)
+          .then(() => {
+            alert("Code copied to clipboard!");
+          })
+          .catch((err) => {
+            alert("Failed to copy code.");
+          });
+      }
+
+      function addNewChatTab() {
+        // Create a new tab
+        const tab = document.createElement("div");
+        tab.className = "tab";
+        tab.innerText = `Chat ${chatIndex + 1}`;
+        tab.setAttribute("data-index", chatIndex);
+        const chatnum = chatIndex;
+        tab.addEventListener("click", () => switchTab(chatnum));
+        document.getElementById("tabs").appendChild(tab);
+
+        // Create a new chat container
+        const chatContainer = document.createElement("div");
+        chatContainer.className = "chat-container";
+        chatContainer.id = `chat-container-${chatIndex}`;
+        document.getElementById("chat-containers").appendChild(chatContainer);
+
+        switchTab(chatIndex);
+        chatIndex++;
+      }
+
+      function switchTab(index) {
+        console.log(`Switching to tab ${index}`);
+        currentTab = index;
+
+        // Activate the correct tab
+        const tabs = document.querySelectorAll(".tab");
+        tabs.forEach((tab, idx) => {
+          if (idx === index) {
+            tab.classList.add("active");
+          } else {
+            tab.classList.remove("active");
+          }
+        });
+
+        // Display the correct chat container
+        const containers = document.querySelectorAll(".chat-container");
+        containers.forEach((container, idx) => {
+          if (idx === index) {
+            container.classList.add("active");
+          } else {
+            container.classList.remove("active");
+          }
+        });
+      }
+
+      // Add the first chat by default
+      addNewChatTab();
+
+      // Add an event listener to the "New Chat" button
+      document
+        .getElementById("newChatButton")
+        .addEventListener("click", addNewChatTab);
+
+      document
+        .getElementById("downloadChatButton")
+        .addEventListener("click", function () {
+          // Vérifier si un conteneur de chat actif existe
+          const container = document.querySelector(".chat-container.active");
+          if (!container) {
+            alert("No active chat to download!");
+            return;
+          }
+
+          // Construire le contenu du fichier à télécharger
+          let chatContent = "";
+          const messages = container.querySelectorAll(".message");
+          messages.forEach((msg) => {
+            chatContent += msg.innerText + "\n";
+          });
+
+          // Créer un élément de lien pour télécharger le fichier
+          const element = document.createElement("a");
+          element.setAttribute(
+            "href",
+            "data:text/plain;charset=utf-8," + encodeURIComponent(chatContent)
+          );
+          element.setAttribute("download", "chat.txt");
+
+          // Simuler le clic pour télécharger
+          element.style.display = "none";
+          document.body.appendChild(element);
+          element.click();
+          document.body.removeChild(element);
+        });
+    </script>
+  </body>
+</html>
