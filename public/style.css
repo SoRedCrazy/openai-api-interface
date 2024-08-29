@@ -1,0 +1,183 @@
+/* Styles globaux */
+body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  box-sizing: border-box;
+  margin: 0;
+}
+
+/* Conteneur principal */
+.container {
+  max-width: 800px;
+  margin: auto;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background-color: #ffffff;
+  box-sizing: border-box;
+}
+
+/* Styles des inputs, textareas et boutons */
+input,
+textarea,
+button {
+  width: calc(100% - 22px); /* Ajuster pour le padding et la bordure */
+  padding: 10px;
+  margin-top: 10px;
+  box-sizing: border-box;
+}
+
+input,
+textarea {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+textarea {
+  resize: vertical;
+}
+
+button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Styles des onglets de chat */
+.tabs {
+  display: flex;
+  margin-bottom: 10px;
+  border-bottom: 2px solid #ddd;
+}
+
+.tab {
+  padding: 10px;
+  cursor: pointer;
+  border: 1px solid #ddd;
+  border-bottom: none;
+  background-color: #f8f9fa;
+  border-radius: 4px 4px 0 0;
+}
+
+.tab.active {
+  background-color: #007bff;
+  color: white;
+  border: 1px solid #007bff;
+  border-bottom: none;
+}
+
+/* Styles des fenêtres de chat */
+.chat-container {
+  display: none;
+  border: 1px solid #ddd;
+  padding: 10px;
+  background-color: #f8f9fa;
+  height: 600px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+  border-radius: 4px;
+}
+
+.chat-container.active {
+  display: block;
+}
+
+/* Styles des messages */
+.message {
+  margin-bottom: 10px;
+}
+
+.message.user {
+  font-weight: bold;
+  color: #007bff;
+}
+
+.message.bot {
+  margin-left: 20px;
+  font-style: italic;
+  color: #333;
+}
+
+/* Styles pour les blocs de code */
+.code-block {
+  background: #f4f4f4;
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin-bottom: 10px;
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Styles du bouton Copier */
+.copy-button {
+  display: block; /* Faire en sorte que le bouton prenne une nouvelle ligne */
+  margin: 10px auto 0; /* Centrer le bouton horizontalement et ajouter une marge au-dessus */
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.copy-button:hover {
+  background: #0056b3;
+}
+
+/* Styles pour les blocs JSON */
+.json-block {
+  background: #f4f4f4;
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.json-block code {
+  display: block;
+  padding: 0;
+  margin: 0;
+  white-space: pre-wrap; /* Préserve les espaces blancs et les retours à la ligne */
+}
+
+.loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+/* Styles pour le spinner */
+.loading-spinner {
+  border: 8px solid #f3f3f3;
+  border-top: 8px solid #3498db;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+}
+
+/* Animation du spinner */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
