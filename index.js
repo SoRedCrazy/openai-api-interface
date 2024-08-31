@@ -3,10 +3,12 @@ const express = require("express");
 const axios = require("axios");
 const path = require("path");
 const CryptoJS = require("crypto-js");
+const multer = require("multer");
+const Tesseract = require("tesseract.js");
 
 const app = express();
 const port = process.env.PORT || 3000;
-
+const upload = multer({ storage: multer.memoryStorage() });
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -82,4 +84,24 @@ app.post("/api/openai", async (req, res) => {
 
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
+});
+
+app.get("/images", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "imageExtraction.html"));
+});
+
+app.post("/extract-text", upload.single("image"), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "Aucune image n'a été téléchargée." });
+  }
+
+  try {
+    const {
+      data: { text },
+    } = await Tesseract.recognize(req.file.buffer, "eng");
+    res.json({ text });
+  } catch (error) {
+    console.error("Erreur lors de l'extraction de texte :", error);
+    res.status(500).json({ error: "Erreur lors de l'extraction de texte." });
+  }
 });

@@ -1,3 +1,9 @@
+////////////////////////////////////////////////////////////
+
+//                        chat                         //
+
+///////////////////////////////////////////////////////////
+
 const secretPassphrase =
   "coasting glitzy tapering finished unmapped jot abide mop goldsmith protract shortly lash";
 let currentTab = 0;
@@ -93,19 +99,20 @@ function decryptData(encryptedData) {
   return bytes.toString(CryptoJS.enc.Utf8);
 }
 function formatCodeBlocks(text) {
-  return text.replace(/```(\w+)\n([\s\S]*?)```/g, (match, lang, code) => {
-    return `
-            <div class="code-block">
-              <pre><code class="language-${lang}">${escapeHtml(
-      code
-    )}</code></pre>
-              <button class="copy-button" onclick="copyToClipboard(\`${code.replace(
-                /`/g,
-                "\\`"
-              )}\`)">Copy</button>
-            </div>
-          `;
-  });
+  return text.replace(
+    /```(\w+)\n([\s\S]*?)```/g,
+    (match, lang, code, index) => {
+      const uniqueId = `code-${index}-${Date.now()}`; // Unique ID for each code block
+      return `
+      <div class="code-block">
+        <pre><code id="${uniqueId}" class="language-${lang}">${escapeHtml(
+        code
+      )}</code></pre>
+        <button class="copy-button" data-target="${uniqueId}">Copy</button>
+      </div>
+    `;
+    }
+  );
 }
 
 function formatJsonBlocks(text) {
@@ -137,6 +144,16 @@ function escapeHtml(text) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
 }
+
+document.addEventListener("click", function (event) {
+  if (event.target.classList.contains("copy-button")) {
+    const targetId = event.target.getAttribute("data-target");
+    const codeElement = document.getElementById(targetId);
+    if (codeElement) {
+      copyToClipboard(codeElement.innerText);
+    }
+  }
+});
 
 function copyToClipboard(text) {
   navigator.clipboard
@@ -214,3 +231,7 @@ document
     element.click();
     document.body.removeChild(element);
   });
+
+document.getElementById("imageButton").addEventListener("click", function () {
+  window.location.href = "/images";
+});

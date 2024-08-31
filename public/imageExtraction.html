@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image Upload and Capture</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Upload Image or Capture Screenshot</h1>
+
+      <form id="apiForm">
+        <label for="apiKey">Enter your API Key:</label>
+        <input
+          type="text"
+          id="apiKey"
+          name="apiKey"
+          placeholder="Enter your API key"
+          required
+        />
+        <br /><br />
+        <label for="imageInput">Select an image:</label>
+        <input type="file" id="imageInput" accept="image/*" />
+        <button type="button" id="uploadButton">Upload Image</button>
+      </form>
+
+      <div id="loading" class="loading" style="display: none">
+        <div class="loading-spinner"></div>
+      </div>
+
+      <div id="extractedText"></div>
+      <div id="openaiResponse"></div>
+
+      <button id="backButton">Back to Chat</button>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+
+    <script src="script_images.js"></script>
+  </body>
+</html>
