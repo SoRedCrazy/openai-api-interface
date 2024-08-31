@@ -47,50 +47,50 @@ document
   });
 
 // Ajoutez un événement sur le bouton pour capturer l'écran
-document
-  .getElementById("captureButton")
-  .addEventListener("click", async function () {
-    const apiKey = document.getElementById("apiKey").value;
+// document
+//   .getElementById("captureButton")
+//   .addEventListener("click", async function () {
+//     const apiKey = document.getElementById("apiKey").value;
 
-    if (!apiKey) {
-      alert("Veuillez entrer votre API Key.");
-      return;
-    }
+//     if (!apiKey) {
+//       alert("Veuillez entrer votre API Key.");
+//       return;
+//     }
 
-    // Capture de la capture d'écran et traitement
-    try {
-      const screenshot = await captureScreenshot();
-      const formData = new FormData();
-      formData.append("image", screenshot);
+//     // Capture de la capture d'écran et traitement
+//     try {
+//       const screenshot = await captureScreenshot();
+//       const formData = new FormData();
+//       formData.append("image", screenshot);
 
-      document.getElementById("loading").style.display = "block";
+//       document.getElementById("loading").style.display = "block";
 
-      const response = await fetch("/extract-text", {
-        method: "POST",
-        body: formData,
-      });
+//       const response = await fetch("/extract-text", {
+//         method: "POST",
+//         body: formData,
+//       });
 
-      const data = await response.json();
-      if (response.ok) {
-        const extractedText = data.text;
-        document.getElementById(
-          "extractedText"
-        ).innerText = `Texte extrait:\n${extractedText}`;
-        await sendExtractedTextToOpenAI(apiKey, extractedText);
-      } else {
-        document.getElementById(
-          "extractedText"
-        ).innerText = `Erreur : ${data.error}`;
-      }
-    } catch (error) {
-      console.error("Erreur:", error);
-      document.getElementById(
-        "extractedText"
-      ).innerText = `Erreur de requête : ${error.message}`;
-    } finally {
-      document.getElementById("loading").style.display = "none";
-    }
-  });
+//       const data = await response.json();
+//       if (response.ok) {
+//         const extractedText = data.text;
+//         document.getElementById(
+//           "extractedText"
+//         ).innerText = `Texte extrait:\n${extractedText}`;
+//         await sendExtractedTextToOpenAI(apiKey, extractedText);
+//       } else {
+//         document.getElementById(
+//           "extractedText"
+//         ).innerText = `Erreur : ${data.error}`;
+//       }
+//     } catch (error) {
+//       console.error("Erreur:", error);
+//       document.getElementById(
+//         "extractedText"
+//       ).innerText = `Erreur de requête : ${error.message}`;
+//     } finally {
+//       document.getElementById("loading").style.display = "none";
+//     }
+//   });
 
 async function captureScreenshot() {
   // Capture de l'écran de la page actuelle
