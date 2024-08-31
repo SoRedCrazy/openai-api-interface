@@ -24,7 +24,10 @@ document
         body: formData,
       });
 
-      const data = await response.json();
+      const text = await response.text(); // Récupère la réponse en tant que texte brut
+      console.log(text); // Affiche la réponse dans la console pour déboguer
+
+      const data = JSON.parse(text);
       if (response.ok) {
         const extractedText = data.text;
         document.getElementById(

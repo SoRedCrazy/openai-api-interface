@@ -82,10 +82,6 @@ app.post("/api/openai", async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
-});
-
 app.get("/images", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "imageExtraction.html"));
 });
@@ -104,4 +100,8 @@ app.post("/extract-text", upload.single("image"), async (req, res) => {
     console.error("Erreur lors de l'extraction de texte :", error);
     res.status(500).json({ error: "Erreur lors de l'extraction de texte." });
   }
+});
+
+app.listen(port, () => {
+  console.log(`Server running on http://localhost:${port}`);
 });
