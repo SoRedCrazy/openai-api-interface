@@ -274,3 +274,46 @@ document
     element.click();
     document.body.removeChild(element);
   });
+
+document
+  .getElementById("clearChatButton")
+  .addEventListener("click", async function () {
+    const chatId = getCurrentChatId(); // Fonction pour obtenir l'ID du chat actuel
+
+    if (!chatId) {
+      alert("No chat ID found for the current tab.");
+      return;
+    }
+
+    try {
+      const response = await fetch(`/clear-chat/${chatId}`, {
+        method: "DELETE",
+      });
+
+      const result = await response.json();
+
+      document.getElementById(`chat-container-${currentTab}`).innerHTML = "";
+      document.getElementById("extractedText").innerText = "";
+      document.getElementById("openaiResponse").innerHTML = "";
+    } catch (error) {
+      console.error("Erreur:", error);
+      alert("Erreur lors de la tentative de suppression du chat.");
+    }
+  });
+
+function getCurrentChatId() {
+  // Utiliser l'index de l'onglet courant pour obtenir l'ID du chat
+  return chatIds[currentTab];
+}
+
+document
+  .getElementById("clearAllButton")
+  .addEventListener("click", function () {
+    // Confirmer l'action avec l'utilisateur
+    if (confirm("Are you sure you want to clear all local storage?")) {
+      localStorage.clear();
+      alert("Local storage has been cleared.");
+      // Optionnel: Vous pouvez aussi rafraîchir la page ou réinitialiser l'interface utilisateur
+      location.reload(); // Recharger la page pour appliquer les changements
+    }
+  });

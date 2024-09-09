@@ -5,6 +5,7 @@ const path = require("path");
 const CryptoJS = require("crypto-js");
 const multer = require("multer");
 const Tesseract = require("tesseract.js");
+const fs = require("fs");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -14,7 +15,29 @@ app.use(express.static(path.join(__dirname, "public")));
 
 const secretPassphrase = process.env.SECRET_PASSPHRASE;
 
-const conversations = {};
+const conversationsFile = path.join(__dirname, "conversations.json");
+const conversations = loadConversations();
+
+function loadConversations() {
+  if (fs.existsSync(conversationsFile)) {
+    const fileContent = fs.readFileSync(conversationsFile, "utf8");
+    try {
+      return JSON.parse(fileContent);
+    } catch (e) {
+      console.error("Error parsing conversations file:", e);
+      return {};
+    }
+  }
+  return {};
+}
+
+function saveConversations() {
+  fs.writeFile(conversationsFile, JSON.stringify(conversations), (err) => {
+    if (err) {
+      console.error("Error writing conversations file:", err);
+    }
+  });
+}
 
 app.post("/api/openai", async (req, res) => {
   try {
@@ -74,6 +97,8 @@ app.post("/api/openai", async (req, res) => {
       content: response.data.choices[0].message.content,
     });
 
+    saveConversations(); // Sauvegarder les changements dans le fichier
+
     // Envoyer la réponse chiffrée au frontend
     res.json({ encryptedResponse });
   } catch (error) {
@@ -97,8 +122,31 @@ app.post("/extract-text", upload.single("image"), async (req, res) => {
     } = await Tesseract.recognize(req.file.buffer, "eng");
     res.json({ text });
   } catch (error) {
-    console.error("Erreur lors de l'extraction de texte :", error);
-    res.status(500).json({ error: "Erreur lors de l'extraction de texte." });
+    if (error.response && error.response.status === 429) {
+      console.error("Rate limit exceeded. Retrying...");
+      // Optionally, implement a retry mechanism with delay
+      res
+        .status(429)
+        .json({ error: "Rate limit exceeded. Please try again later." });
+    } else {
+      console.error(
+        "Erreur lors de l'appel à l'API OpenAI : ",
+        error.response ? error.response.data : error.message
+      );
+      res.status(500).json({ error: error.message });
+    }
+  }
+});
+
+app.delete("/clear-chat/:chatId", (req, res) => {
+  const chatId = req.params.chatId;
+
+  if (conversations[chatId]) {
+    conversations[chatId] = []; // Effacer le contenu de la conversation
+    saveConversations(); // Sauvegarder les changements dans le fichier
+    res.json({ success: true });
+  } else {
+    res.status(404).json({ success: false, message: "Chat not found" });
   }
 });
 
