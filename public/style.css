@@ -1,178 +1,207 @@
-/* Styles globaux */
+/* Style général de la page */
 body {
-  font-family: Arial, sans-serif;
-  padding: 20px;
-  box-sizing: border-box;
+  font-family: "Arial", sans-serif;
+  background-color: #f4f7fa;
+  color: #333;
   margin: 0;
+  padding: 0;
 }
 
-/* Conteneur principal */
 .container {
-  max-width: 800px;
-  margin: auto;
+  max-width: 900px;
+  margin: 0 auto;
   padding: 20px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+  text-align: center;
+  color: #4a90e2;
+  font-size: 2.5rem;
+}
+
+.main-content {
+  background-color: #fff;
+  padding: 20px;
   border-radius: 8px;
-  background-color: #ffffff;
-  box-sizing: border-box;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Styles des inputs, textareas et boutons */
-input,
-textarea,
-button {
-  width: calc(100% - 22px); /* Ajuster pour le padding et la bordure */
-  padding: 10px;
-  margin-top: 10px;
-  box-sizing: border-box;
-}
-
-input,
-textarea {
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-textarea {
-  resize: vertical;
-}
-
-button {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #0056b3;
-}
-
-/* Styles des onglets de chat */
 .tabs {
   display: flex;
-  margin-bottom: 10px;
-  border-bottom: 2px solid #ddd;
+  justify-content: space-around;
+  margin-bottom: 20px;
 }
 
-.tab {
+.tabs .tab {
   padding: 10px;
   cursor: pointer;
-  border: 1px solid #ddd;
-  border-bottom: none;
-  background-color: #f8f9fa;
-  border-radius: 4px 4px 0 0;
+  background-color: #4a90e2;
+  color: white;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.tabs .tab:hover {
+  background-color: #357ab8;
 }
 
 .tab.active {
-  background-color: #007bff;
-  color: white;
-  border: 1px solid #007bff;
-  border-bottom: none;
+  background-color: #007bff; /* Couleur de fond de l'onglet actif */
+  color: #fff; /* Couleur du texte de l'onglet actif */
+  border-bottom: 2px solid #007bff; /* Bordure en dessous de l'onglet actif */
 }
 
-/* Styles des fenêtres de chat */
-.chat-container {
-  display: none;
+.chat-containers {
+  height: 900px;
+  overflow-y: auto;
   border: 1px solid #ddd;
   padding: 10px;
-  background-color: #f8f9fa;
-  height: 600px;
-  overflow-y: auto;
-  margin-bottom: 10px;
-  border-radius: 4px;
+  margin-bottom: 20px;
 }
 
-.chat-container.active {
-  display: block;
+.chat-container {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
 }
 
-/* Styles des messages */
 .message {
   margin-bottom: 10px;
 }
 
 .message.user {
-  font-weight: bold;
-  color: #007bff;
+  background-color: #e2f1ff;
+  padding: 10px;
+  border-radius: 5px;
+  text-align: left;
 }
 
 .message.bot {
-  margin-left: 20px;
-  font-style: italic;
-  color: #333;
-}
-
-/* Styles pour les blocs de code */
-.code-block {
-  background: #f4f4f4;
-  border: 1px solid #ddd;
+  background-color: #e6ffe6;
   padding: 10px;
-  margin-bottom: 10px;
-  position: relative;
-  border-radius: 4px;
-  overflow: hidden;
+  border-radius: 5px;
+  text-align: right;
 }
 
-/* Styles du bouton Copier */
-.copy-button {
-  display: block; /* Faire en sorte que le bouton prenne une nouvelle ligne */
-  margin: 10px auto 0; /* Centrer le bouton horizontalement et ajouter une marge au-dessus */
-  background: #007bff;
+pre code {
+  background-color: #2d2d2d;
+  padding: 15px;
+  border-radius: 5px;
+  color: #f8f8f2;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.input-form label,
+.restore-form label {
+  display: block;
+  margin: 10px 0 5px;
+}
+
+input[type="text"],
+textarea,
+select {
+  width: 97%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+button.primary-btn {
+  background-color: #4a90e2;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+button.primary-btn:hover {
+  background-color: #357ab8;
+}
+
+button.full-width {
+  width: 100%;
+}
+
+button.secondary-btn {
+  background-color: #5bbd5b;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-right: 10px;
+}
+
+button.secondary-btn:hover {
+  background-color: #4aa54a;
+}
+
+button.danger-btn {
+  background-color: #e74c3c;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+button.danger-btn:hover {
+  background-color: #c0392b;
+}
+
+.chat-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+#restoreChatForm {
+  margin-top: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+#restoreChatForm input {
+  flex: 2;
+  margin-right: 10px;
+  margin-top: 14px;
+}
+
+#restoreChatForm button {
+  flex: 1;
+  background-color: #5bbd5b;
   color: white;
   border: none;
-  padding: 5px 10px;
+  border-radius: 5px;
   cursor: pointer;
-  border-radius: 4px;
-  text-align: center;
-}
-
-.copy-button:hover {
-  background: #0056b3;
-}
-
-/* Styles pour les blocs JSON */
-.json-block {
-  background: #f4f4f4;
-  border: 1px solid #ddd;
-  padding: 10px;
-  margin-bottom: 10px;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.json-block code {
-  display: block;
-  padding: 0;
-  margin: 0;
-  white-space: pre-wrap; /* Préserve les espaces blancs et les retours à la ligne */
+  font-size: 16px;
 }
 
 .loading {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: none;
+  display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
-/* Styles pour le spinner */
 .loading-spinner {
-  border: 8px solid #f3f3f3;
-  border-top: 8px solid #3498db;
+  border: 4px solid #f3f3f3;
   border-radius: 50%;
-  width: 50px;
-  height: 50px;
+  border-top: 4px solid #4a90e2;
+  width: 40px;
+  height: 40px;
   animation: spin 1s linear infinite;
 }
 
-/* Animation du spinner */
 @keyframes spin {
   0% {
     transform: rotate(0deg);
@@ -180,4 +209,84 @@ button:hover {
   100% {
     transform: rotate(360deg);
   }
+}
+
+/* Form styles */
+form {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.code-block {
+  background-color: #000; /* Black background */
+  color: #fff; /* White text */
+  border-radius: 5px;
+  padding: 10px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: auto; /* Ensure scrollbars appear if content overflows */
+}
+
+.code-block pre {
+  margin: 0; /* Remove default margin from pre */
+}
+
+.code-block code {
+  display: block; /* Make code element block-level */
+  white-space: pre-wrap; /* Wrap long lines */
+  word-wrap: break-word; /* Break long words */
+  color: #fff; /* White text color */
+}
+
+/* Styles for JSON block */
+.json-block {
+  background-color: #000; /* Black background */
+  color: #fff; /* White text */
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: auto; /* Ensure scrollbars appear if content overflows */
+}
+
+.json-block pre {
+  margin: 0; /* Remove default margin from pre */
+}
+
+.json-block code {
+  display: block; /* Make code element block-level */
+  white-space: pre-wrap; /* Wrap long lines */
+  word-wrap: break-word; /* Break long words */
+  color: #fff; /* White text color */
+}
+
+/* Styles for the copy button inside the code block */
+.code-block .copy-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #28a745; /* Green background */
+  color: #fff; /* White text */
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.code-block .copy-button:hover {
+  background-color: #218838; /* Darker green */
+  transform: scale(1.05); /* Slightly larger on hover */
+}
+
+.code-block .copy-button:active {
+  background-color: #1e7e34; /* Even darker green when clicked */
+}
+
+.code-block .copy-button:focus {
+  outline: none; /* Remove default focus outline */
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.5); /* Add a blue outline on focus */
 }

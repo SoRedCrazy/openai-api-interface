@@ -150,6 +150,18 @@ app.delete("/clear-chat/:chatId", (req, res) => {
   }
 });
 
+app.get("/api/restoreChat/:uuid", (req, res) => {
+  const { uuid } = req.params;
+
+  const conversation = conversations[uuid];
+
+  if (conversation) {
+    res.json({ success: true, conversation });
+  } else {
+    res.status(404).json({ success: false, error: "Conversation not found" });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });

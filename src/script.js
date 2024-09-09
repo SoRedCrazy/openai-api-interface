@@ -37,27 +37,35 @@ function saveChatsToLocalStorage() {
   localStorage.setItem("chatIndex", chatIndex.toString());
 }
 
-// Ajouter une nouvelle conversation
 function addNewChatTab() {
+  const chatNum = chatIndex; // Conserver la constante chatNum
+
   const tab = document.createElement("div");
   tab.className = "tab";
-  tab.innerText = `Chat ${chatIndex + 1}`;
-  tab.setAttribute("data-index", chatIndex);
-  const chatNum = chatIndex;
+  tab.innerText = `Chat ${chatNum + 1}`;
+  tab.setAttribute("data-index", chatNum);
   tab.addEventListener("click", () => switchTab(chatNum));
   document.getElementById("tabs").appendChild(tab);
 
   const chatContainer = document.createElement("div");
   chatContainer.className = "chat-container";
-  chatContainer.id = `chat-container-${chatIndex}`;
+  chatContainer.id = `chat-container-${chatNum}`;
+  chatContainer.style.display = "none"; // Masquer les containers au début
+
+  // UUID for each chat
+  const chatUUID = generateUUID();
+  chatIds[chatNum] = chatUUID;
+
+  // Display the UUID in the chat interface for users to copy or save
+  const uuidDisplay = document.createElement("div");
+  uuidDisplay.className = "uuid-display";
+  uuidDisplay.innerText = `Conversation UUID: ${chatUUID}`;
+  chatContainer.appendChild(uuidDisplay);
+
   document.getElementById("chat-containers").appendChild(chatContainer);
 
-  chatIds[chatIndex] = generateChatId();
-
-  switchTab(chatIndex);
+  switchTab(chatNum);
   chatIndex++;
-
-  saveChatsToLocalStorage(); // Sauvegarder après l'ajout d'un nouvel onglet
 }
 
 // Recréer les onglets à partir des données sauvegardées
@@ -67,24 +75,34 @@ function updateChatTabs() {
     tab.className = "tab";
     tab.innerText = `Chat ${parseInt(index) + 1}`;
     tab.setAttribute("data-index", index);
-    const chatNum = parseInt(index);
-    tab.addEventListener("click", () => switchTab(chatNum));
+    tab.addEventListener("click", () => switchTab(parseInt(index)));
     document.getElementById("tabs").appendChild(tab);
   });
   switchTab(0); // Afficher le premier chat par défaut
 }
-
 // Fonction pour changer d'onglet
 function switchTab(index) {
+  if (index < 0 || index >= chatIndex) return; // Vérifie que l'index est valide
+
   currentTab = index;
 
-  const tabs = document.querySelectorAll(".tab");
-  tabs.forEach((tab, idx) => tab.classList.toggle("active", idx === index));
-
+  // Masquer tous les containers
   const containers = document.querySelectorAll(".chat-container");
-  containers.forEach((container, idx) =>
-    container.classList.toggle("active", idx === index)
-  );
+  containers.forEach((container) => (container.style.display = "none"));
+
+  // Afficher le container de l'onglet sélectionné
+  const activeContainer = document.getElementById(`chat-container-${index}`);
+  if (activeContainer) {
+    activeContainer.style.display = "block";
+  }
+
+  // Mettre à jour les classes des onglets
+  const tabs = document.querySelectorAll(".tab");
+  tabs.forEach((tab) => tab.classList.remove("active"));
+  const activeTab = document.querySelector(`.tab[data-index="${index}"]`);
+  if (activeTab) {
+    activeTab.classList.add("active");
+  }
 }
 
 document
@@ -207,7 +225,7 @@ function formatJsonBlocks(text) {
     return `
           <div class="json-block">
             <pre><code>${escapeHtml(formattedJson)}</code></pre>
-            <button class="copy-button" onclick="copyToClipboard(\`${escapeHtml(
+            <button class="copy-button secondary-btn" onclick="copyToClipboard(\`${escapeHtml(
               formattedJson
             ).replace(/`/g, "\\`")}\`)">Copy</button>
           </div>
@@ -238,10 +256,9 @@ function copyToClipboard(text) {
   navigator.clipboard
     .writeText(text)
     .then(() => alert("Code copied to clipboard!"))
-    .catch((err) => alert("Failed to copy code."));
+    .catch((err) => console.error("Failed to copy text: ", err));
 }
 
-// UUID Generation function
 function generateUUID() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
     var r = (Math.random() * 16) | 0,
@@ -250,13 +267,31 @@ function generateUUID() {
   });
 }
 
-function generateChatId() {
-  return generateUUID();
-}
-
 document
   .getElementById("newChatButton")
   .addEventListener("click", addNewChatTab);
+
+document.getElementById("clearChatButton").addEventListener("click", () => {
+  const currentContainer = document.getElementById(
+    `chat-container-${currentTab}`
+  );
+  if (currentContainer) {
+    // Effacer uniquement le contenu du chat, sans supprimer l'UUID
+    currentContainer
+      .querySelectorAll(".message")
+      .forEach((message) => message.remove());
+    saveChatsToLocalStorage();
+  }
+});
+
+document.getElementById("clearAllButton").addEventListener("click", () => {
+  document.getElementById("chat-containers").innerHTML = "";
+  document.getElementById("tabs").innerHTML = "";
+  chatIds = {};
+  chatIndex = 0;
+  saveChatsToLocalStorage();
+  addNewChatTab();
+});
 
 document
   .getElementById("downloadChatButton")
@@ -276,44 +311,19 @@ document
   });
 
 document
-  .getElementById("clearChatButton")
-  .addEventListener("click", async function () {
-    const chatId = getCurrentChatId(); // Fonction pour obtenir l'ID du chat actuel
+  .getElementById("restoreChatForm")
+  .addEventListener("submit", function (event) {
+    event.preventDefault();
+    const chatUUID = document.getElementById("chatUUID").value;
+    const index = Object.keys(chatIds).find((key) => chatIds[key] === chatUUID);
 
-    if (!chatId) {
-      alert("No chat ID found for the current tab.");
-      return;
-    }
-
-    try {
-      const response = await fetch(`/clear-chat/${chatId}`, {
-        method: "DELETE",
-      });
-
-      const result = await response.json();
-
-      document.getElementById(`chat-container-${currentTab}`).innerHTML = "";
-      document.getElementById("extractedText").innerText = "";
-      document.getElementById("openaiResponse").innerHTML = "";
-    } catch (error) {
-      console.error("Erreur:", error);
-      alert("Erreur lors de la tentative de suppression du chat.");
+    if (index !== undefined) {
+      switchTab(parseInt(index));
+    } else {
+      alert("Chat UUID not found.");
     }
   });
 
-function getCurrentChatId() {
-  // Utiliser l'index de l'onglet courant pour obtenir l'ID du chat
-  return chatIds[currentTab];
-}
-
-document
-  .getElementById("clearAllButton")
-  .addEventListener("click", function () {
-    // Confirmer l'action avec l'utilisateur
-    if (confirm("Are you sure you want to clear all local storage?")) {
-      localStorage.clear();
-      alert("Local storage has been cleared.");
-      // Optionnel: Vous pouvez aussi rafraîchir la page ou réinitialiser l'interface utilisateur
-      location.reload(); // Recharger la page pour appliquer les changements
-    }
-  });
+document.getElementById("imageButton").addEventListener("click", () => {
+  window.location.href = "/images";
+});

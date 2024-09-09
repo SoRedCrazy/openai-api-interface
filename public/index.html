@@ -7,76 +7,88 @@
     <link rel="stylesheet" href="style.css" />
     <!-- Prism.js CSS -->
     <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css"
       rel="stylesheet"
     />
   </head>
   <body>
     <div class="container">
-      <h1>Multi-Flux OpenAI Interface</h1>
+      <header>
+        <h1>Multi-Flux OpenAI Interface</h1>
+      </header>
 
-      <div class="tabs" id="tabs">
-        <!-- Tabs will be dynamically added here -->
+      <div class="main-content">
+        <div class="tabs" id="tabs">
+          <!-- Tabs will be dynamically added here -->
+        </div>
+
+        <div class="chat-containers" id="chat-containers">
+          <!-- Chat containers will be dynamically added here -->
+        </div>
+
+        <form id="openai-form" class="input-form">
+          <label for="apiKey">Your OpenAI API Key:</label>
+          <input
+            type="text"
+            id="apiKey"
+            name="apiKey"
+            placeholder="Enter your OpenAI API key"
+            required
+          />
+
+          <label for="model">Select GPT Model:</label>
+          <select id="model" name="model" required>
+            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+            <option value="gpt-3.5-turbo-16k">GPT-3.5 Turbo 16k</option>
+            <option value="gpt-4">GPT-4</option>
+            <option value="gpt-4-turbo">GPT-4 Turbo</option>
+          </select>
+
+          <label for="prompt">Enter your prompt:</label>
+          <textarea
+            id="prompt"
+            name="prompt"
+            rows="4"
+            placeholder="Ask anything..."
+            required
+          ></textarea>
+
+          <!-- Submit button now spans the full width -->
+          <button type="submit" class="primary-btn full-width">Submit</button>
+        </form>
+
+        <div class="chat-actions">
+          <button id="newChatButton" class="secondary-btn">New Chat</button>
+          <button id="downloadChatButton" class="secondary-btn">
+            Download Chat
+          </button>
+          <button id="clearChatButton" class="secondary-btn">Clear Chat</button>
+          <button id="clearAllButton" class="danger-btn">Clear All</button>
+        </div>
+
+        <form id="restoreChatForm">
+          <label for="chatUUID">Enter Chat UUID to Restore:</label>
+          <div style="display: flex; align-items: center">
+            <input
+              type="text"
+              id="chatUUID"
+              placeholder="Enter chat UUID here"
+            />
+            <button type="submit">Restore Chat</button>
+          </div>
+        </form>
+        <button id="imageButton" class="primary-btn full-width">
+          GPT image
+        </button>
       </div>
 
-      <div class="chat-containers" id="chat-containers">
-        <!-- Chat containers will be dynamically added here -->
-      </div>
-
-      <form id="openai-form">
-        <label for="apiKey">Your OpenAI API Key:</label>
-        <input
-          type="text"
-          id="apiKey"
-          name="apiKey"
-          placeholder="Enter your OpenAI API key"
-          required
-        />
-
-        <label for="model">Select GPT Model:</label>
-        <select id="model" name="model" required>
-          <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-          <option value="gpt-3.5-turbo-16k">GPT-3.5 Turbo 16k</option>
-          <option value="gpt-4">GPT-4</option>
-          <option value="gpt-4-0314">GPT-4 0314</option>
-          <option value="gpt-4-1106">GPT-4 1106</option>
-          <option value="gpt-4-turbo">GPT-4 Turbo</option>
-          <!-- Add more models as needed -->
-        </select>
-        <br /><br />
-        <label for="prompt">Enter your prompt:</label>
-        <textarea
-          id="prompt"
-          name="prompt"
-          rows="3"
-          placeholder="Ask anything..."
-          required
-        ></textarea>
-
-        <button type="submit">Submit</button>
-      </form>
-
-      <button id="newChatButton" style="margin-top: 10px">New Chat</button>
-
-      <button id="downloadChatButton" style="margin-top: 10px">
-        Download Chat
-      </button>
-      <button id="clearChatButton">Clear Chat</button>
-      <button id="clearAllButton">Clear All</button>
-
-      <button id="imageButton">Images</button>
       <div id="loading" class="loading" style="display: none">
         <div class="loading-spinner"></div>
       </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
-    <!-- Prism.js CSS -->
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css"
-      rel="stylesheet"
-    />
 
-    <!-- Prism.js Library -->
+    <!-- Include Prism.js for syntax highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
