@@ -1,7 +1,6 @@
 const secretPassphrase =
   "coasting glitzy tapering finished unmapped jot abide mop goldsmith protract shortly lash";
 
-// Ajoutez un événement sur le bouton pour télécharger une image
 document
   .getElementById("uploadButton")
   .addEventListener("click", async function () {
@@ -24,8 +23,8 @@ document
         body: formData,
       });
 
-      const text = await response.text(); // Récupère la réponse en tant que texte brut
-      console.log(text); // Affiche la réponse dans la console pour déboguer
+      const text = await response.text();
+      console.log(text);
 
       const data = JSON.parse(text);
       if (response.ok) {

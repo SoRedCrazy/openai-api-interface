@@ -1,14 +1,91 @@
-////////////////////////////////////////////////////////////
-
+//////////////////////////////////////////////////////////
 //                        chat                         //
-
-///////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
 
 const secretPassphrase =
   "coasting glitzy tapering finished unmapped jot abide mop goldsmith protract shortly lash";
 let currentTab = 0;
 let chatIndex = 0;
-const chatIds = {};
+let chatIds = {};
+
+// Charger les chats depuis le localStorage au démarrage
+window.onload = function () {
+  const savedChats = localStorage.getItem("chats");
+  const savedChatIds = localStorage.getItem("chatIds");
+  const savedChatIndex = localStorage.getItem("chatIndex");
+
+  if (savedChats && savedChatIds && savedChatIndex) {
+    document.getElementById("chat-containers").innerHTML = savedChats;
+    chatIds = JSON.parse(savedChatIds);
+    chatIndex = parseInt(savedChatIndex);
+
+    // Recréer les onglets pour chaque chat sauvegardé
+    updateChatTabs();
+  }
+
+  // Si aucune donnée n'est sauvegardée, ajouter un premier chat
+  if (!savedChats) {
+    addNewChatTab();
+  }
+};
+
+// Sauvegarder les chats dans le localStorage
+function saveChatsToLocalStorage() {
+  const chats = document.getElementById("chat-containers").innerHTML;
+  localStorage.setItem("chats", chats);
+  localStorage.setItem("chatIds", JSON.stringify(chatIds));
+  localStorage.setItem("chatIndex", chatIndex.toString());
+}
+
+// Ajouter une nouvelle conversation
+function addNewChatTab() {
+  const tab = document.createElement("div");
+  tab.className = "tab";
+  tab.innerText = `Chat ${chatIndex + 1}`;
+  tab.setAttribute("data-index", chatIndex);
+  const chatNum = chatIndex;
+  tab.addEventListener("click", () => switchTab(chatNum));
+  document.getElementById("tabs").appendChild(tab);
+
+  const chatContainer = document.createElement("div");
+  chatContainer.className = "chat-container";
+  chatContainer.id = `chat-container-${chatIndex}`;
+  document.getElementById("chat-containers").appendChild(chatContainer);
+
+  chatIds[chatIndex] = generateChatId();
+
+  switchTab(chatIndex);
+  chatIndex++;
+
+  saveChatsToLocalStorage(); // Sauvegarder après l'ajout d'un nouvel onglet
+}
+
+// Recréer les onglets à partir des données sauvegardées
+function updateChatTabs() {
+  Object.keys(chatIds).forEach((index) => {
+    const tab = document.createElement("div");
+    tab.className = "tab";
+    tab.innerText = `Chat ${parseInt(index) + 1}`;
+    tab.setAttribute("data-index", index);
+    const chatNum = parseInt(index);
+    tab.addEventListener("click", () => switchTab(chatNum));
+    document.getElementById("tabs").appendChild(tab);
+  });
+  switchTab(0); // Afficher le premier chat par défaut
+}
+
+// Fonction pour changer d'onglet
+function switchTab(index) {
+  currentTab = index;
+
+  const tabs = document.querySelectorAll(".tab");
+  tabs.forEach((tab, idx) => tab.classList.toggle("active", idx === index));
+
+  const containers = document.querySelectorAll(".chat-container");
+  containers.forEach((container, idx) =>
+    container.classList.toggle("active", idx === index)
+  );
+}
 
 document
   .getElementById("openai-form")
@@ -79,6 +156,7 @@ document
       conversationDiv.appendChild(errorMessage);
     } finally {
       document.getElementById("loading").style.display = "none";
+      saveChatsToLocalStorage(); // Sauvegarder après la réponse
     }
 
     conversationDiv.scrollTop = conversationDiv.scrollHeight;
@@ -98,6 +176,7 @@ function decryptData(encryptedData) {
   const bytes = CryptoJS.AES.decrypt(encryptedData, secretPassphrase);
   return bytes.toString(CryptoJS.enc.Utf8);
 }
+
 function formatCodeBlocks(text) {
   return text.replace(
     /```(\w+)\n([\s\S]*?)```/g,
@@ -162,46 +241,18 @@ function copyToClipboard(text) {
     .catch((err) => alert("Failed to copy code."));
 }
 
-function addNewChatTab() {
-  const tab = document.createElement("div");
-  tab.className = "tab";
-  tab.innerText = `Chat ${chatIndex + 1}`;
-  tab.setAttribute("data-index", chatIndex);
-  const chatNum = chatIndex;
-  tab.addEventListener("click", () => switchTab(chatNum));
-  document.getElementById("tabs").appendChild(tab);
-
-  const chatContainer = document.createElement("div");
-  chatContainer.className = "chat-container";
-  chatContainer.id = `chat-container-${chatIndex}`;
-  document.getElementById("chat-containers").appendChild(chatContainer);
-
-  // Generate a unique chatId for this tab
-  chatIds[chatIndex] = generateChatId();
-
-  switchTab(chatIndex);
-  chatIndex++;
+// UUID Generation function
+function generateUUID() {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    var r = (Math.random() * 16) | 0,
+      v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
 }
 
 function generateChatId() {
-  // Generate a unique chat ID (this can be more sophisticated if needed)
-  return `chat-${Date.now()}`;
+  return generateUUID();
 }
-
-function switchTab(index) {
-  currentTab = index;
-
-  const tabs = document.querySelectorAll(".tab");
-  tabs.forEach((tab, idx) => tab.classList.toggle("active", idx === index));
-
-  const containers = document.querySelectorAll(".chat-container");
-  containers.forEach((container, idx) =>
-    container.classList.toggle("active", idx === index)
-  );
-}
-
-// Add the first chat by default
-addNewChatTab();
 
 document
   .getElementById("newChatButton")
@@ -210,28 +261,16 @@ document
 document
   .getElementById("downloadChatButton")
   .addEventListener("click", function () {
-    const container = document.querySelector(".chat-container.active");
-    if (!container) {
-      alert("No active chat to download!");
-      return;
-    }
-
-    let chatContent = "";
-    const messages = container.querySelectorAll(".message");
-    messages.forEach((msg) => (chatContent += msg.innerText + "\n"));
-
+    const chatContent = document.getElementById(
+      `chat-container-${currentTab}`
+    ).innerText;
     const element = document.createElement("a");
     element.setAttribute(
       "href",
       "data:text/plain;charset=utf-8," + encodeURIComponent(chatContent)
     );
-    element.setAttribute("download", "chat.txt");
-    element.style.display = "none";
+    element.setAttribute("download", `chat_${currentTab}.txt`);
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
   });
-
-document.getElementById("imageButton").addEventListener("click", function () {
-  window.location.href = "/images";
-});
