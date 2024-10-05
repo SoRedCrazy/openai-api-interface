@@ -181,8 +181,7 @@ document
   });
 
 function formatResponseText(text) {
-  let formattedText = formatJsonBlocks(text);
-  formattedText = formatCodeBlocks(formattedText);
+  let formattedText = convertMarkdownToHtml(text);
   return formattedText;
 }
 
@@ -212,36 +211,26 @@ function formatCodeBlocks(text) {
   );
 }
 
-function formatJsonBlocks(text) {
-  const jsonPattern = /(?:^|\n)({[\s\S]*?})(?:$|\n)/g;
-  return text.replace(jsonPattern, (match, json) => {
-    let formattedJson;
-    try {
-      const parsedJson = JSON.parse(json);
-      formattedJson = JSON.stringify(parsedJson, null, 2);
-    } catch (e) {
-      formattedJson = json;
-    }
-    return `
-          <div class="json-block">
-            <pre><code>${escapeHtml(formattedJson)}</code></pre>
-            <button class="copy-button secondary-btn" onclick="copyToClipboard(\`${escapeHtml(
-              formattedJson
-            ).replace(/`/g, "\\`")}\`)">Copy</button>
-          </div>
-        `;
-  });
-}
+function convertMarkdownToHtml(markdownText) {
+    // Convert Markdown to HTML using marked
+    let html = marked.parse(markdownText);
 
-function escapeHtml(text) {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
+    // Add copy buttons to code blocks
+    html = html.replace(
+        /<pre><code class="language-(\w+)">([\s\S]*?)<\/code><\/pre>/g,
+        (match, lang, code, index) => {
+            const uniqueId = `code-${index}-${Date.now()}`; // Unique ID for each code block
+            return `
+            <div class="code-block">
+                <pre><code id="${uniqueId}" class="language-${lang}">${code}</code></pre>
+                <button class="copy-button" data-target="${uniqueId}">Copy</button>
+            </div>
+            `;
+        }
+    );
 
+    return html;
+}
 document.addEventListener("click", function (event) {
   if (event.target.classList.contains("copy-button")) {
     const targetId = event.target.getAttribute("data-target");
