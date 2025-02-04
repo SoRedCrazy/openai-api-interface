@@ -26,6 +26,7 @@ window.onload = function () {
   // Si aucune donnée n'est sauvegardée, ajouter un premier chat
   if (!savedChats) {
     addNewChatTab();
+    switchTab(0);
   }
 };
 
@@ -280,6 +281,7 @@ document.getElementById("clearAllButton").addEventListener("click", () => {
   chatIndex = 0;
   saveChatsToLocalStorage();
   addNewChatTab();
+  switchTab(chatIndex - 1);
 });
 
 document
