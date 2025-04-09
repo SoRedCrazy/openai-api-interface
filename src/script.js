@@ -112,6 +112,7 @@ document
     event.preventDefault();
 
     const apiKey = document.getElementById("apiKey").value;
+    const provider = document.getElementById("provider").value; // Get selected provider
     const model = document.getElementById("model").value;
     const prompt = document.getElementById("prompt").value;
     const chatId = chatIds[currentTab];
@@ -129,7 +130,7 @@ document
     const encryptedPrompt = encryptData(prompt);
     const encryptedChatId = encryptData(chatId.toString());
 
-    // Afficher le message de l'utilisateur (en clair)
+    // Display the user's message
     const userMessage = document.createElement("div");
     userMessage.className = "message user";
     userMessage.innerText = `You: ${prompt}`;
@@ -139,7 +140,8 @@ document
     document.getElementById("loading").style.display = "flex";
 
     try {
-      const response = await fetch("/api/openai", {
+      const endpoint = provider === "openai" ? "/api/openai" : "/api/claude"; // Determine API endpointique est correcte
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -152,7 +154,14 @@ document
         }),
       });
 
-      const data = await response.json();
+      if (!response.ok) {
+        const responseText = await response.json();
+        
+        console.log("Response not OK status:", response.status, "Content:", responseText);
+        throw new Error(`HTTP error!: ${responseText.error}`);
+      }
+
+      const data = await response.json(); // Assurez-vous que la réponse est bien JSON
 
       if (response.ok) {
         const decryptedResponse = decryptData(data.encryptedResponse);
@@ -175,7 +184,7 @@ document
       conversationDiv.appendChild(errorMessage);
     } finally {
       document.getElementById("loading").style.display = "none";
-      saveChatsToLocalStorage(); // Sauvegarder après la réponse
+      saveChatsToLocalStorage(); // Save after the response
     }
 
     conversationDiv.scrollTop = conversationDiv.scrollHeight;
