@@ -10,7 +10,7 @@ const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 
 const app = express();
-const port = process.env.PORT || 3000; 
+const port = process.env.PORT || 3005; 
 const upload = multer({ storage: multer.memoryStorage() });
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
